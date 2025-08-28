@@ -1,0 +1,25 @@
+python write_load.py --base http://127.0.0.1:8000 --count 2000 --concurrency 100 --out slinks_created.jsonl
+START: 2025-08-25T14:46:29.990210+00:00
+END:   2025-08-25T14:47:44.671269+00:00
+TOTAL: 74.681 s
+OPS:   writes=2000, ok=2000, fail=0
+TPS:   26.8 req/s
+
+
+
+ python seed_slinks.py --port 5433 --db slink_db --user slink --password slink_password --count 2000
+START: 2025-08-25T15:16:58.840063+00:00
+END:   2025-08-25T15:16:59.927253+00:00
+TOTAL: 1.087 s
+INSERTED: 2000/2000 rows
+RPS: 1840.7 rows/s
+(.venv) 
+
+Hp@DESKTOP-E5165LO MINGW64 ~/Documents/Ruchi_Office_Important/DE_Project/slink_platform_demo (main)
+$ python read_db_load.py --port 5433 --db slink_db --user slink --password slink_password --in mock_codes.jsonl --count 15000 --threads 32
+START: 2025-08-25T15:18:51.969343+00:00
+END:   2025-08-25T15:23:26.044875+00:00
+TOTAL: 274.076 s
+OPS:   reads=15000, ok=15000, fail=0
+RPS:   54.7 reads/s
+(.venv) 
