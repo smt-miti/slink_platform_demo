@@ -27,6 +27,14 @@ A modular **FastAPI URL shortener** with strategy-driven code generation (Bitly-
 ```
 shortlink-platform/
 │
+├── auth/                          # Auth package for FastAPI apps. Lightweight, composable.
+│   ├── config.py                  # User definition and load (for demo purpose - in memory dictionary) 
+│   ├── dependencies.py            # FastAPI dependency functions for authentication  
+│   ├── schemas.py                 # Pydantic schemas for request/response models     
+|   ├── service.py                 # Core authentication logic
+|   ├── utils.py                   # General Utils like hashing the password
+│   └── __init__.py
+|
 ├── slink_platform/                 # Core service package
 │   ├── analytics/                  # Analytics engine
 │   │   ├── __init__.py
