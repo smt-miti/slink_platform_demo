@@ -47,7 +47,7 @@
 
 ## Approach
 - Layered design: FastAPI (API) → SlinkManager (rules) → Storage (persistence) → Analytics (events).
-- Dependency Injection for swappable components and testability.
+- Dependency Injection for swappable components and testability (example - Auth module).
 - Keep hot redirect path lean; add cache/CDN in production for read scaling
 - Use environment-driven config (length, strategy, backends) for safe rollouts.
 - Comprehensive tests (unit/integration) around manager rules, redirects, and analytics behavior.
@@ -303,7 +303,7 @@ sequenceDiagram
 
 ## 5) Logical Data model
 **Slinks**
-- `code` (PK, Base62, min len 8), `url` (string), `clicks` (int), `alias` (unique, nullable), click_count (int), status (string).
+- `code` (PK, Base62, min len 8), `url` (string), `clicks` (int), `alias` (unique, nullable), click_count (int), `status` (string).
 
 **Click events**
 - `code` (FK), `timestamp` (UTC), `source` (`api`|`browser`), `valid` (bool).
