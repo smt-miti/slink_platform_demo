@@ -39,7 +39,7 @@
 
 ## Design Considerations
 - Deterministic code generation (SHA-256 → Base62) for idempotency; minimal collision extension.
-- Bitly like nase62 encoded ID generation for shortest possible code, uniqueness guaranteed within application design.
+- Bitly like base62 encoded ID generation for shortest possible code, uniqueness guaranteed within application design.
 - Alias takes precedence over generated code; strict Base62 + length validation.
 - Redirect path must serve browsers (302) and API clients (JSON) reliably and fast.
 - Analytics logs both valid and invalid hits with source (api/browser); eventual consistency is acceptable.
