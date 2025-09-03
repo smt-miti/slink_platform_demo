@@ -17,7 +17,7 @@ LLM Prompt Example:
     injected dependencies, and a clean separation between API and business logic."
 """
 
-from fastapi import FastAPI, HTTPException, Request, Query, Response, Depends
+from fastapi import FastAPI, HTTPException, Request, Query, Response
 from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, Union
@@ -28,8 +28,6 @@ from slink_platform.storage.storage import Storage
 from slink_platform.manager.slink_manager import SlinkManager
 from slink_platform.analytics.analytics import Analytics
 from slink_platform.config import settings  # optional, for logging
-
-from auth.dependencies import get_current_user
 
 
 class URLRequest(BaseModel):
@@ -229,133 +227,12 @@ def create_app() -> FastAPI:
             for short links in a FastAPI service."
         """
         return analytics.summary(only_valid=only_valid)
+
+    return app
     
     @app.get("/health_slink")
     def health_slink():
         return {"status": "ok"}
-
-    # Secure end points demonstration - protected by Basic Auth
-    # ----------------------------------------------------------------
-
-    @app.post("/secure/slink")
-    def secure_create_slink(
-        req: URLRequest,
-        request: Request,
-        check_reachable: bool = Query(
-            False, description="Verify if URL is reachable (HEAD request)."
-        ),
-        user: str = Depends(get_current_user),
-    ) -> Dict[str, Any]:
-        """
-        Create a short link for a given URL (authentication required).
-
-        Args:
-            req (URLRequest): Request payload containing 'url' and optional 'alias'.
-            request (Request): FastAPI request object.
-            check_reachable (bool, optional): If True, validates URL reachability (placeholder).
-            user (str): Authenticated username (injected by dependency).
-
-        Returns:
-            dict: Contains message, slink_code, short URL, relative path, and original URL.
-
-        Raises:
-            HTTPException: If URL is invalid, unreachable, alias exists, or auth fails.
-        """
-        try:
-            safe_url = quote(req.url, safe=":/?&=#")
-            slink_code = slink_manager.create_slink(
-                safe_url, req.alias, check_reachable=check_reachable
-            )
-
-            short_url = str(request.url_for("redirect_slink", slink_code=slink_code))
-            short_path = app.url_path_for("redirect_slink", slink_code=slink_code)
-
-            return {
-                "message": f"Slink created by {user}",
-                "slink_code": slink_code,
-                "short_url": short_url,
-                "short_path": short_path,
-                "original_url": req.url,
-            }
-
-        except ValueError as ve:
-            detail = str(ve)
-            if detail == "Invalid URL format":
-                detail = "Invalid or unreachable URL"
-            raise HTTPException(status_code=400, detail=detail)
-
-    @app.get("/secure/slink/{slink_code}")
-    def secure_redirect_slink(
-        slink_code: str,
-        request: Request,
-        user: str = Depends(get_current_user),
-    ) -> Response:
-        """
-        Retrieve the original URL for a slink (authentication required).
-
-        Logs a click event to analytics and returns URL/click count.
-
-        Args:
-            slink_code (str): Short code to resolve.
-            request (Request): FastAPI request object.
-            user (str): Authenticated username.
-
-        Returns:
-            Response: JSON with original URL and click count.
-
-        Raises:
-            HTTPException: If slink is not found or auth fails.
-        """
-        slink = storage.get_slink(slink_code)
-        source = _detect_source(request)
-
-        if slink is None:
-            analytics.log_click(slink_code, source=source, valid=False)
-            raise HTTPException(status_code=404, detail="Slink not found")
-
-        analytics.log_click(slink_code, source=source, valid=True)
-        storage.increment_click(slink_code)
-
-        updated = storage.get_slink(slink_code) or slink
-        assert updated is not None
-
-        return JSONResponse(
-            {
-                "requested_by": user,
-                "original_url": updated["url"],
-                "clicks": updated["clicks"],
-            }
-        )
-
-    @app.get("/secure/analytics/summary")
-    def secure_analytics_summary(
-        only_valid: bool = Query(False, description="Include only valid clicks."),
-        user: str = Depends(get_current_user),
-    ) -> Dict[str, Any]:
-        """
-        Retrieve a summary of all click events across slinks (authentication required).
-
-        Args:
-            only_valid (bool, optional): If True, include only valid clicks.
-            user (str): Authenticated username.
-
-        Returns:
-            dict: Contains the requesting user and analytics summary.
-
-        Raises:
-            HTTPException: If authentication fails.
-        """
-        try:
-            return {
-                "requested_by": user,
-                "summary": analytics.summary(only_valid=only_valid),
-            }
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve analytics: {str(e)}"
-            )
-        
-    return app
 
 # Backward compatibility for uvicorn and legacy imports:
 # `uvicorn main:app --reload` and `from main import app` continue to work.

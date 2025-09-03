@@ -29,6 +29,7 @@ from urllib.parse import urlparse
 import urllib.request
 import urllib.error
 import socket
+import requests
 
 from ..storage.storage import Storage
 from ..analytics.analytics import Analytics
@@ -59,14 +60,14 @@ class SlinkManager:
                 if 200 <= code < 400:
                     return True
                 # Some servers return 405 to HEAD; fall through to GET
-                if code == 405:
+                if code in (403, 405):
                     pass
                 else:
                     # 4xx/5xx => not reachable
                     return False
         except urllib.error.HTTPError as e:
             # 405 (Method Not Allowed) for HEAD: try GET
-            if e.code == 405:
+            if e.code in (403, 405):
                 pass
             else:
                 # 4xx/5xx treated as unreachable
@@ -82,7 +83,6 @@ class SlinkManager:
                 return 200 <= code < 400
         except Exception:
             return False
-    
     """
     Coordinates creation and lookup rules for slinks.
 

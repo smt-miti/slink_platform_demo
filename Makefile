@@ -8,6 +8,7 @@
 install:
 	python -m venv .venv
 	.venv/Scripts/pip install -r requirements.txt
+	source .venv/Scripts/activate
 
 run:
 	.venv/Scripts/uvicorn main:app --reload

@@ -200,6 +200,8 @@ def get_strategy_from_config(name: Optional[str] = None) -> BaseStrategy:
     """
     key = (name or getattr(settings, "CODE_STRATEGY", "sha256") or "sha256").strip().lower()
     cls = STRATEGY_REGISTRY.get(key) or STRATEGY_REGISTRY["sha256"]
+    print(f"Using code strategy: {key} -> {cls.__name__}")
+
     if cls is HMACSHA256Strategy:
         secret = getattr(settings, "CODE_SECRET", "")
         return HMACSHA256Strategy(secret=secret)

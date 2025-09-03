@@ -73,6 +73,7 @@ class DBStorage(BaseStorage):
     @contextlib.contextmanager
     def _conn(self):
         """Context manager creating a psycopg connection."""
+        print("Opening new database connection...",self.dsn)
         con = psycopg.connect(self.dsn)
         con.autocommit = True  # default; override in methods if needed
         try:
@@ -85,6 +86,7 @@ class DBStorage(BaseStorage):
     def get_slink(self, code: str) -> Optional[Dict[str, Any]]:
         """Return a slink row by code or None if not found."""
         with self._conn() as con, con.cursor(row_factory=psycopg.rows.dict_row) as cur:
+            print(f"DBStorage.connection_detail: connection={con}")
             cur.execute("SELECT code, url, alias, created_at, status, COALESCE(click_count,0) AS click_count FROM slinks WHERE code = %s", (code,))
             row = cur.fetchone()
             return dict(row) if row else None

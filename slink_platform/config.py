@@ -41,7 +41,7 @@ class _Settings:
     DB_DSN: str = os.getenv("SLINK_DB_DSN", "")
 
     # -------- Short-code generation (common) --------
-    #CODE_STRATEGY: str = os.getenv("SLINK_CODE_STRATEGY", "sha256").strip().lower()
+    #CODE_STRATEGY: str = os.getenv("SLINK_CODE_STRATEGY", "sequential").strip().lower()
     CODE_STRATEGY: str = os.getenv("SLINK_CODE_STRATEGY", "sha256").strip().lower()
 
 
